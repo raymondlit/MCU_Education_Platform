@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>单片机中断系统学习平台</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #4CAF50, #2196F3);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .nav-panel {
+            width: 250px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-title {
+            color: #0d47a1;
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-item {
+            margin: 15px 0;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 12px;
+            background: #e3f2fd;
+            color: #0d47a1;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .nav-link:hover {
+            background: #bbdefb;
+            transform: translateX(5px);
+        }
+
+        .content-area {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .diagram-container {
+            height: 600px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 2px dashed #90caf9;
+        }
+
+        .register-node {
+            position: absolute;
+            width: 120px;
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 2px solid #2196F3;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .register-node:hover {
+            background: #bbdefb;
+            transform: scale(1.05);
+        }
+
+        .interrupt-node {
+            position: absolute;
+            width: 100px;
+            padding: 8px;
+            background: #c8e6c9;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 2px solid #4CAF50;
+        }
+
+        .connection-line {
+            position: absolute;
+            background: #90caf9;
+            transform-origin: 0 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .highlight {
+            background-color: #fff9c4;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MCS-51单片机中断系统</h1>
+        <p>可视化学习平台 - 点击下方寄存器或左侧导航开始学习</p>
+    </div>
+
+    <div class="main-container">
+        <div class="nav-panel">
+            <h2 class="nav-title">中断寄存器</h2>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="TCON设置2.html" class="nav-link">TCON - 定时器控制</a></li>
+                <li class="nav-item"><a href="TMOD设置2.html" class="nav-link">TMOD - 定时器模式</a></li>
+                <li class="nav-item"><a href="SCON设置.html" class="nav-link">SCON - 串口控制</a></li>
+                <li class="nav-item"><a href="IE设置.html" class="nav-link">IE - 中断使能</a></li>
+                <li class="nav-item"><a href="IP设置.html" class="nav-link">IP - 中断优先级</a></li>
+            </ul>
+
+            <h2 class="nav-title" style="margin-top: 30px;">中断程序拼图训练</h2>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="编程教学拼图游戏1.html" class="nav-link">定时逻辑拼图</span></li>
+                <li class="nav-item"><span class="nav-link" style="background: #c8e6c9;">定时程序拼图</span></li>
+                <li class="nav-item"><span class="nav-link" style="background: #c8e6c9;">外部中断1</span></li>
+                <li class="nav-item"><span class="nav-link" style="background: #c8e6c9;">定时器1中断</span></li>
+                <li class="nav-item"><span class="nav-link" style="background: #c8e6c9;">串口中断</span></li>
+            </ul>
+        </div>
+
+        <div class="content-area">
+            <h2 style="color: #0d47a1; margin-top: 0;">中断系统结构图</h2>
+            <div class="diagram-container" id="interruptDiagram">
+                <!-- 寄存器节点 -->
+                <div class="register-node" style="top: 50px; left: 300px;" onclick="location.href='IE设置.html'">
+                    <strong>IE</strong><br>中断使能
+                </div>
+                <div class="register-node" style="top: 50px; left: 500px;" onclick="location.href='IP设置.html'">
+                    <strong>IP</strong><br>中断优先级
+                </div>
+                <div class="register-node" style="top: 200px; left: 200px;" onclick="location.href='TCON设置2.html'">
+                    <strong>TCON</strong><br>定时器控制
+                </div>
+                <div class="register-node" style="top: 200px; left: 400px;" onclick="location.href='TMOD设置2.html'">
+                    <strong>TMOD</strong><br>定时器模式
+                </div>
+                <div class="register-node" style="top: 200px; left: 600px;" onclick="location.href='SCON设置.html'">
+                    <strong>SCON</strong><br>串口控制
+                </div>
+
+                <!-- 中断源节点 -->
+                <div class="interrupt-node" style="top: 400px; left: 100px;">
+                    外部中断0<br>INT0
+                </div>
+                <div class="interrupt-node" style="top: 400px; left: 250px;">
+                    定时器0中断<br>TF0
+                </div>
+                <div class="interrupt-node" style="top: 400px; left: 400px;">
+                    外部中断1<br>INT1
+                </div>
+                <div class="interrupt-node" style="top: 400px; left: 550px;">
+                    定时器1中断<br>TF1
+                </div>
+                <div class="interrupt-node" style="top: 400px; left: 700px;">
+                    串口中断<br>TI/RI
+                </div>
+
+                <!-- 连接线将通过JS动态生成 -->
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px;">
+                <h3 style="color: #2e7d32; margin-top: 0;">工作原理说明</h3>
+                <p>中断系统通过<span class="highlight">IE寄存器</span>控制中断使能，<span class="highlight">IP寄存器</span>设置优先级，</p>
+                <p>当多个中断同时发生时，高优先级中断将打断低优先级中断的执行。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>MCS-51单片机教学平台 &copy; 2023 - 互动式学习系统</p>
+    </div>
+
+    <script>
+        // 动态绘制连接线
+        document.addEventListener('DOMContentLoaded', function() {
+            const diagram = document.getElementById('interruptDiagram');
+            const connections = [
+                // IE到各中断
+                { from: {x: 360, y: 100}, to: {x: 150, y: 400} },
+                { from: {x: 360, y: 100}, to: {x: 300, y: 400} },
+                { from: {x: 360, y: 100}, to: {x: 450, y: 400} },
+                { from: {x: 360, y: 100}, to: {x: 600, y: 400} },
+                { from: {x: 360, y: 100}, to: {x: 750, y: 400} },
+                
+                // 寄存器到中断的关联
+                { from: {x: 260, y: 250}, to: {x: 300, y: 400}, color: '#f44336' },
+                { from: {x: 460, y: 250}, to: {x: 300, y: 400}, color: '#f44336' },
+                { from: {x: 260, y: 250}, to: {x: 600, y: 400}, color: '#f44336' },
+                { from: {x: 460, y: 250}, to: {x: 600, y: 400}, color: '#f44336' },
+                { from: {x: 660, y: 250}, to: {x: 750, y: 400}, color: '#f44336' }
+            ];
+
+            connections.forEach(conn => {
+                const line = document.createElement('div');
+                line.className = 'connection-line';
+                
+                const x1 = conn.from.x;
+                const y1 = conn.from.y;
+                const x2 = conn.to.x;
+                const y2 = conn.to.y;
+                
+                const length = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+                const angle = Math.atan2(y2-y1, x2-x1) * 180 / Math.PI;
+                
+                line.style.width = `${length}px`;
+                line.style.height = '2px';
+                line.style.left = `${x1}px`;
+                line.style.top = `${y1}px`;
+                line.style.transform = `rotate(${angle}deg)`;
+                line.style.opacity = '0.7';
+                line.style.zIndex = '-1';
+                
+                if(conn.color) {
+                    line.style.background = conn.color;
+                }
+                
+                diagram.appendChild(line);
+            });
+        });
+    </script>
+</body>
+</html>
