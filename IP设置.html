@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>IP寄存器教学演示（增强版）</title>
+    <style>
+        /* 完全复用IE的样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .bit-definition {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .bit-definition h4 {
+            margin: 5px 0;
+            color: #2c3e50;
+        }
+
+        .bit-definition p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .main-content {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .register {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .bit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .switch {
+            width: 40px;
+            height: 60px;
+            background: #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .switch.on {
+            background: #4CAF50;
+        }
+
+        .switch.off {
+            background: #f44336;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 25px;
+            background: #fff;
+            left: 5px;
+            transition: all 0.3s;
+        }
+
+        .switch.on::after {
+            top: 5px;
+        }
+
+        .switch.off::after {
+            bottom: 5px;
+        }
+
+        .input-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 5px;
+        }
+
+        #result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .correct {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .wrong {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            width: 200px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .status-panel {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 5px;
+        }
+        
+        .status-item {
+            margin: 8px 0;
+            padding: 6px;
+            background: #fff;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .status-title {
+            color: #0d47a1;
+            font-weight: bold;
+        }
+        
+        .active {
+            color: #2e7d32;
+        }
+        
+        .inactive {
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h3>IP寄存器定义说明</h3>
+            <div class="bit-definition">
+                <h4>整体功能</h4>
+                <p>中断优先级寄存器（地址：B8H）<br>
+                设置各中断源的优先级</p>
+            </div>
+
+            <h4>位定义说明：</h4>
+            <div class="bit-definition">
+                <h4>-- (bit7)</h4>
+                <p>保留位</p>
+            </div>
+            <div class="bit-definition">
+                <h4>-- (bit6)</h4>
+                <p>保留位</p>
+            </div>
+            <div class="bit-definition">
+                <h4>-- (bit5)</h4>
+                <p>保留位</p>
+            </div>
+            <div class="bit-definition">
+                <h4>PS (bit4)</h4>
+                <p>串口中断优先级</p>
+            </div>
+            <div class="bit-definition">
+                <h4>PT1 (bit3)</h4>
+                <p>定时器1中断优先级</p>
+            </div>
+            <div class="bit-definition">
+                <h4>PX1 (bit2)</h4>
+                <p>外部中断1优先级</p>
+            </div>
+            <div class="bit-definition">
+                <h4>PT0 (bit1)</h4>
+                <p>定时器0中断优先级</p>
+            </div>
+            <div class="bit-definition">
+                <h4>PX0 (bit0)</h4>
+                <p>外部中断0优先级</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h2>IP寄存器互动演示（增强版）</h2>
+            
+            <div class="register" id="ipRegister">
+                <div class="bit" data-bit="7">--</div>
+                <div class="bit" data-bit="6">--</div>
+                <div class="bit" data-bit="5">--</div>
+                <div class="bit" data-bit="4">PS<br><div class="switch off" data-bit="4"></div></div>
+                <div class="bit" data-bit="3">PT1<br><div class="switch off" data-bit="3"></div></div>
+                <div class="bit" data-bit="2">PX1<br><div class="switch off" data-bit="2"></div></div>
+                <div class="bit" data-bit="1">PT0<br><div class="switch off" data-bit="1"></div></div>
+                <div class="bit" data-bit="0">PX0<br><div class="switch off" data-bit="0"></div></div>
+            </div>
+
+            <div class="input-section">
+                <h3>当前设置值：</h3>
+                <p>二进制：<span id="binValue">0000 0000</span></p>
+                <p>十六进制：0x<span id="hexValue">00</span></p>
+                
+                <h3>验证设置：</h3>
+                <input type="text" id="inputValue" placeholder="输入正确二进制值（如00010101）">
+                <button onclick="checkAnswer()">验证答案</button>
+                <div id="result"></div>
+            </div>
+
+            <div class="status-panel">
+                <h3>实时优先级状态：</h3>
+                <div class="status-item">
+                    <span class="status-title">串口中断：</span>
+                    <span id="psStatus" class="inactive">低优先级</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-title">定时器1中断：</span>
+                    <span id="pt1Status" class="inactive">低优先级</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-title">外部中断1：</span>
+                    <span id="px1Status" class="inactive">低优先级</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-title">定时器0中断：</span>
+                    <span id="pt0Status" class="inactive">低优先级</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-title">外部中断0：</span>
+                    <span id="px0Status" class="inactive">低优先级</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ip = 0x00;
+
+        // 位映射
+        const bitMap = {
+            'ps': 4,
+            'pt1': 3,
+            'px1': 2,
+            'pt0': 1,
+            'px0': 0
+        };
+
+        document.querySelectorAll('.switch').forEach(switchElement => {
+            switchElement.addEventListener('click', function() {
+                const bit = parseInt(this.dataset.bit);
+                ip ^= (1 << bit);
+                this.classList.toggle('on');
+                this.classList.toggle('off');
+                updateDisplay();
+            });
+        });
+
+        function updateDisplay() {
+            // 数值显示
+            const binStr = ip.toString(2).padStart(8, '0');
+            document.getElementById('binValue').textContent = 
+                binStr.substr(0,4) + ' ' + binStr.substr(4);
+            document.getElementById('hexValue').textContent = 
+                ip.toString(16).toUpperCase().padStart(2, '0');
+
+            // 状态更新
+            const updatePriority = (elementId, bit) => {
+                const element = document.getElementById(elementId);
+                const isHigh = (ip & (1 << bit)) !== 0;
+                element.className = isHigh ? 'active' : 'inactive';
+                element.textContent = isHigh ? '高优先级' : '低优先级';
+            };
+
+            updatePriority('psStatus', bitMap.ps);
+            updatePriority('pt1Status', bitMap.pt1);
+            updatePriority('px1Status', bitMap.px1);
+            updatePriority('pt0Status', bitMap.pt0);
+            updatePriority('px0Status', bitMap.px0);
+        }
+
+        function checkAnswer() {
+            const input = document.getElementById('inputValue').value.replace(/\s/g, '');
+            const resultDiv = document.getElementById('result');
+            
+            if (!/^[01]{8}$/.test(input)) {
+                resultDiv.textContent = "请输入8位二进制数（例如：00010101）";
+                resultDiv.className = 'wrong';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            const expected = parseInt(input, 2);
+            if(ip === expected) {
+                resultDiv.textContent = "✓ 设置正确！";
+                resultDiv.className = 'correct';
+            } else {
+                resultDiv.textContent = "✗ 设置错误，请检查各控制位";
+                resultDiv.className = 'wrong';
+            }
+            resultDiv.style.display = 'block';
+        }
+
+        updateDisplay(); // 初始化
+    </script>
+</body>
+</html>

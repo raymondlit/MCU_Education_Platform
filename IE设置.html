@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>IE寄存器教学演示（增强版）</title>
+    <style>
+        /* 完全复用TCON的样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .bit-definition {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .bit-definition h4 {
+            margin: 5px 0;
+            color: #2c3e50;
+        }
+
+        .bit-definition p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .main-content {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .register {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .bit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .switch {
+            width: 40px;
+            height: 60px;
+            background: #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .switch.on {
+            background: #4CAF50;
+        }
+
+        .switch.off {
+            background: #f44336;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 25px;
+            background: #fff;
+            left: 5px;
+            transition: all 0.3s;
+        }
+
+        .switch.on::after {
+            top: 5px;
+        }
+
+        .switch.off::after {
+            bottom: 5px;
+        }
+
+        .input-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 5px;
+        }
+
+        #result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .correct {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .wrong {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            width: 200px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .status-panel {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 5px;
+        }
+        
+        .status-item {
+            margin: 8px 0;
+            padding: 6px;
+            background: #fff;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .status-title {
+            color: #0d47a1;
+            font-weight: bold;
+        }
+        
+        .active {
+            color: #2e7d32;
+        }
+        
+        .inactive {
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h3>IE寄存器定义说明</h3>
+            <div class="bit-definition">
+                <h4>整体功能</h4>
+                <p>中断使能寄存器（地址：A8H）<br>
+                控制各中断源的使能状态</p>
+            </div>
+
+            <h4>位定义说明：</h4>
+            <!-- 位定义修正 -->
+            <div class="bit-definition">
+                <h4>EA (bit7)</h4>
+                <p>总中断开关：1=全局使能</p>
+            </div>
+            <div class="bit-definition">
+                <h4>-- (bit6)</h4>
+                <p>保留位</p>
+            </div>
+            <div class="bit-definition">
+                <h4>-- (bit5)</h4>
+                <p>保留位</p>
+            </div>
+            <div class="bit-definition">
+                <h4>ES (bit4)</h4>
+                <p>串口中断使能</p>
+            </div>
+            <div class="bit-definition">
+                <h4>ET1 (bit3)</h4>
+                <p>定时器1中断使能</p>
+            </div>
+            <div class="bit-definition">
+                <h4>EX1 (bit2)</h4>
+                <p>外部中断1使能</p>
+            </div>
+            <div class="bit-definition">
+                <h4>ET0 (bit1)</h4>
+                <p>定时器0中断使能</p>
+            </div>
+            <div class="bit-definition">
+                <h4>EX0 (bit0)</h4>
+                <p>外部中断0使能</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h2>IE寄存器互动演示（增强版）</h2>
+            
+            <div class="register" id="ieRegister">
+                <div class="bit" data-bit="7">EA<br><div class="switch off" data-bit="7"></div></div>
+                <div class="bit" data-bit="6">--</div>
+                <div class="bit" data-bit="5">--</div>
+                <div class="bit" data-bit="4">ES<br><div class="switch off" data-bit="4"></div></div>
+                <div class="bit" data-bit="3">ET1<br><div class="switch off" data-bit="3"></div></div>
+                <div class="bit" data-bit="2">EX1<br><div class="switch off" data-bit="2"></div></div>
+                <div class="bit" data-bit="1">ET0<br><div class="switch off" data-bit="1"></div></div>
+                <div class="bit" data-bit="0">EX0<br><div class="switch off" data-bit="0"></div></div>
+            </div>
+
+            <div class="input-section">
+                <h3>当前设置值：</h3>
+                <p>二进制：<span id="binValue">0000 0000</span></p>
+                <p>十六进制：0x<span id="hexValue">00</span></p>
+                
+                <h3>验证设置：</h3>
+                <input type="text" id="inputValue" placeholder="输入正确二进制值（如10101010）">
+                <button onclick="checkAnswer()">验证答案</button>
+                <div id="result"></div>
+            </div>
+
+            <!-- 状态面板修正 -->
+            <div class="status-panel">
+                <h3>实时中断状态：</h3>
+                <div class="status-item">
+                    <span class="status-title">总中断：</span>
+                    <span id="eaStatus" class="inactive">禁用</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-title">串口中断：</span>
+                    <span id="esStatus" class="inactive">禁用</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-title">定时器1中断：</span>
+                    <span id="et1Status" class="inactive">禁用</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-title">外部中断1：</span>
+                    <span id="ex1Status" class="inactive">禁用</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-title">定时器0中断：</span>
+                    <span id="et0Status" class="inactive">禁用</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-title">外部中断0：</span>
+                    <span id="ex0Status" class="inactive">禁用</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ie = 0x00;
+
+        // 修正位映射
+        const bitMap = {
+            'ea': 7,
+            'es': 4,
+            'et1': 3,
+            'ex1': 2,
+            'et0': 1,
+            'ex0': 0
+        };
+
+        document.querySelectorAll('.switch').forEach(switchElement => {
+            switchElement.addEventListener('click', function() {
+                const bit = parseInt(this.dataset.bit);
+                ie ^= (1 << bit);
+                this.classList.toggle('on');
+                this.classList.toggle('off');
+                updateDisplay();
+            });
+        });
+
+        function updateDisplay() {
+            // 数值显示
+            const binStr = ie.toString(2).padStart(8, '0');
+            document.getElementById('binValue').textContent = 
+                binStr.substr(0,4) + ' ' + binStr.substr(4);
+            document.getElementById('hexValue').textContent = 
+                ie.toString(16).toUpperCase().padStart(2, '0');
+
+            // 状态更新修正
+            const updateStatus = (elementId, bit) => {
+                const element = document.getElementById(elementId);
+                const isActive = (ie & (1 << bit)) !== 0;
+                element.className = isActive ? 'active' : 'inactive';
+                element.textContent = isActive ? '使能' : '禁用';
+            };
+
+            updateStatus('eaStatus', bitMap.ea);
+            updateStatus('esStatus', bitMap.es);
+            updateStatus('et1Status', bitMap.et1);
+            updateStatus('ex1Status', bitMap.ex1);
+            updateStatus('et0Status', bitMap.et0);
+            updateStatus('ex0Status', bitMap.ex0);
+        }
+        // 验证功能
+        function checkAnswer() {
+            const input = document.getElementById('inputValue').value.replace(/\s/g, '');
+            const resultDiv = document.getElementById('result');
+            
+            if (!/^[01]{8}$/.test(input)) {
+                resultDiv.textContent = "请输入8位二进制数（例如：10101010）";
+                resultDiv.className = 'wrong';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            const expected = parseInt(input, 2);
+            if(ie === expected) {
+                resultDiv.textContent = "✓ 设置正确！";
+                resultDiv.className = 'correct';
+            } else {
+                resultDiv.textContent = "✗ 设置错误，请检查各控制位";
+                resultDiv.className = 'wrong';
+            }
+            resultDiv.style.display = 'block';
+        }
+
+        updateDisplay(); // 初始化
+    </script>
+</body>
+</html>

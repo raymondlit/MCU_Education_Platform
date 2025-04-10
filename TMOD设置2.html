@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>TMOD寄存器教学演示（增强版）</title>
+    <style>
+        /* 沿用TCON相同样式结构 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .bit-definition {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .bit-definition h4 {
+            margin: 5px 0;
+            color: #2c3e50;
+        }
+
+        .bit-definition p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .main-content {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .register {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .timer-group {
+            display: flex;
+            gap: 15px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .bit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .switch {
+            width: 40px;
+            height: 60px;
+            background: #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+          .switch.on {
+            background: #4CAF50;
+        }
+
+        .switch.off {
+            background: #f44336;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 25px;
+            background: #fff;
+            left: 5px;
+            transition: all 0.3s;
+        }
+
+        .switch.on::after {
+            top: 5px;
+        }
+
+        .switch.off::after {
+            bottom: 5px;
+        }
+
+        .input-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 5px;
+        }
+
+        #result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .correct {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .wrong {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            width: 200px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .mode-panel {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 5px;
+        }
+
+        .mode-item {
+            padding: 8px;
+            margin: 10px 0;
+            background: white;
+            border-left: 4px solid #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h3>TMOD寄存器定义说明</h3>
+            <div class="bit-definition">
+                <h4>整体功能</h4>
+                <p>定时器模式寄存器（地址：89H）<br>
+                低4位控制T0，高4位控制T1</p>
+            </div>
+
+             <h4>位定义说明：</h4>
+            <div class="bit-definition">
+                <h4>GATE1 (bit7)</h4>
+                <p>门控位：0-TR1启动，1-INT1+TR1启动</p>
+            </div>
+            <div class="bit-definition">
+                <h4>C/T1 (bit6)</h4>
+                <p>0=定时模式，1=计数模式</p>
+            </div>
+            <div class="bit-definition">
+                <h4>M11 (bit5)</h4>
+                <p>模式高位：与M01组合选择工作方式</p>
+            </div>
+            <div class="bit-definition">
+                <h4>M01 (bit4)</h4>
+                <p>模式低位</p>
+            </div>
+            <div class="bit-definition">
+                <h4>GATE0 (bit3)</h4>
+                <p>门控位：0-TR0启动，1-INT0+TR0启动</p>
+            </div>
+            <div class="bit-definition">
+                <h4>C/T0 (bit2)</h4>
+                <p>0=定时模式，1=计数模式</p>
+            </div>
+            <div class="bit-definition">
+                <h4>M10 (bit1)</h4>
+                <p>模式高位：与M00组合选择工作方式</p>
+            </div>
+            <div class="bit-definition">
+                <h4>M00 (bit0)</h4>
+                <p>模式低位</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h2>TMOD寄存器互动演示（增强版）</h2>
+            
+            <div class="register">
+                <div class="timer-group">
+                    <!-- 定时器1 -->
+                    <div class="bit" data-bit="7">GATE1<br><div class="switch off" data-bit="7"></div></div>
+                    <div class="bit" data-bit="6">C/T1<br><div class="switch off" data-bit="6"></div></div>
+                    <div class="bit" data-bit="5">M11<br><div class="switch off" data-bit="5"></div></div>
+                    <div class="bit" data-bit="4">M01<br><div class="switch off" data-bit="4"></div></div>
+                </div>
+                <div class="timer-group">
+                    <!-- 定时器0 -->
+                    <div class="bit" data-bit="3">GATE0<br><div class="switch off" data-bit="3"></div></div>
+                    <div class="bit" data-bit="2">C/T0<br><div class="switch off" data-bit="2"></div></div>
+                    <div class="bit" data-bit="1">M10<br><div class="switch off" data-bit="1"></div></div>
+                    <div class="bit" data-bit="0">M00<br><div class="switch off" data-bit="0"></div></div>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <h3>当前设置值：</h3>
+                <p>二进制：<span id="binValue">0000 0000</span></p>
+                <p>十六进制：0x<span id="hexValue">00</span></p>
+                
+                <h3>验证设置：</h3>
+                <input type="text" id="inputValue" placeholder="输入正确二进制值（如00100011）">
+                <button onclick="checkAnswer()">验证答案</button>
+                <div id="result"></div>
+            </div>
+
+            <div class="mode-panel">
+                <h3>工作模式解析：</h3>
+                <div class="mode-item" id="t1-mode">定时器1模式：模式0</div>
+                <div class="mode-item" id="t0-mode">定时器0模式：模式0</div>
+                <div class="mode-item" id="gate-status">门控状态：TR独立控制</div>
+                <div class="mode-item" id="counter-mode">计数器模式：未启用</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tmod = 0x00;
+        const modeMap = {
+            0: '模式0（13位定时器）',
+            1: '模式1（16位定时器）',
+            2: '模式2（8位自动重装）',
+            3: '模式3（双8位定时器）'
+        };
+
+        // 初始化开关事件
+        document.querySelectorAll('.switch').forEach(switchElement => {
+            switchElement.addEventListener('click', function() {
+                const bit = parseInt(this.dataset.bit);
+                tmod ^= (1 << bit);
+                this.classList.toggle('on');
+                this.classList.toggle('off');
+                updateDisplay();
+            });
+        });
+
+        // 更新显示
+        function updateDisplay() {
+            // 数值显示
+            const binStr = tmod.toString(2).padStart(8, '0');
+            document.getElementById('binValue').textContent = 
+                binStr.substr(0,4) + ' ' + binStr.substr(4);
+            document.getElementById('hexValue').textContent = 
+                tmod.toString(16).toUpperCase().padStart(2, '0');
+
+            // 模式解析
+            const t1Mode = (tmod >> 4) & 0x03;
+            const t0Mode = tmod & 0x03;
+            const isCounter = (tmod & 0x06) !== 0;
+            
+            document.getElementById('t1-mode').textContent = `定时器1模式：${modeMap[t1Mode]}`;
+            document.getElementById('t0-mode').textContent = `定时器0模式：${modeMap[t0Mode]}`;
+            document.getElementById('gate-status').textContent = 
+                `门控状态：${(tmod & 0x88) ? '外部信号+TR控制' : 'TR独立控制'}`;
+            document.getElementById('counter-mode').textContent = 
+                `计数器模式：${isCounter ? '已启用' : '未启用'}`;
+        }
+
+        // 验证答案（与TCON相同逻辑）
+        function checkAnswer() {
+            const input = document.getElementById('inputValue').value.replace(/\s/g, '');
+            const resultDiv = document.getElementById('result');
+            
+            if (!/^[01]{8}$/.test(input)) {
+                resultDiv.textContent = "请输入8位二进制数（例如：00100011）";
+                resultDiv.className = 'wrong';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            const expected = parseInt(input, 2);
+            if(tmod === expected) {
+                resultDiv.textContent = "✓ 设置正确！";
+                resultDiv.className = 'correct';
+            } else {
+                resultDiv.textContent = "✗ 设置错误，请检查各控制位";
+                resultDiv.className = 'wrong';
+            }
+            resultDiv.style.display = 'block';
+        }
+
+        updateDisplay();
+    </script>
+</body>
+</html>

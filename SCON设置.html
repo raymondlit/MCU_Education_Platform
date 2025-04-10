@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>SCON寄存器教学演示（增强版）</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .bit-definition {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .bit-definition h4 {
+            margin: 5px 0;
+            color: #2c3e50;
+        }
+
+        .bit-definition p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .main-content {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .register {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .bit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .switch {
+            width: 40px;
+            height: 60px;
+            background: #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .switch.on {
+            background: #4CAF50;
+        }
+
+        .switch.off {
+            background: #f44336;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 25px;
+            background: #fff;
+            left: 5px;
+            transition: all 0.3s;
+        }
+
+        .switch.on::after {
+            top: 5px;
+        }
+
+        .switch.off::after {
+            bottom: 5px;
+        }
+
+        .input-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 5px;
+        }
+
+        #result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .correct {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .wrong {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            width: 200px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .status-panel {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 5px;
+        }
+        
+        .status-item {
+            margin: 8px 0;
+            padding: 6px;
+            background: #fff;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .status-title {
+            color: #0d47a1;
+            font-weight: bold;
+        }
+        
+        .active {
+            color: #2e7d32;
+        }
+        
+        .inactive {
+            color: #c62828;
+        }
+        
+        .event-flag {
+            color: #d32f2f;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h3>SCON寄存器定义说明</h3>
+            <div class="bit-definition">
+                <h4>整体功能</h4>
+                <p>串行控制寄存器（地址：98H）<br>
+                控制串行通信的工作模式和状态</p>
+            </div>
+
+            <h4>位定义说明：</h4>
+            <div class="bit-definition">
+                <h4>SM0 (bit7)</h4>
+                <p>串行模式选择高位</p>
+            </div>
+            <div class="bit-definition">
+                <h4>SM1 (bit6)</h4>
+                <p>串行模式选择低位</p>
+            </div>
+            <div class="bit-definition">
+                <h4>SM2 (bit5)</h4>
+                <p>多机通信控制位</p>
+            </div>
+            <div class="bit-definition">
+                <h4>REN (bit4)</h4>
+                <p>允许接收控制位：1=允许接收</p>
+            </div>
+            <div class="bit-definition">
+                <h4>TB8 (bit3)</h4>
+                <p>发送数据第9位</p>
+            </div>
+            <div class="bit-definition">
+                <h4>RB8 (bit2)</h4>
+                <p>接收数据第9位</p>
+            </div>
+            <div class="bit-definition">
+                <h4>TI (bit1)</h4>
+                <p>发送中断标志：需软件清零</p>
+            </div>
+            <div class="bit-definition">
+                <h4>RI (bit0)</h4>
+                <p>接收中断标志：需软件清零</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h2>SCON寄存器互动演示（增强版）</h2>
+            
+            <div class="register" id="sconRegister">
+                <div class="bit" data-bit="7">SM0<br><div class="switch off" data-bit="7"></div></div>
+                <div class="bit" data-bit="6">SM1<br><div class="switch off" data-bit="6"></div></div>
+                <div class="bit" data-bit="5">SM2<br><div class="switch off" data-bit="5"></div></div>
+                <div class="bit" data-bit="4">REN<br><div class="switch off" data-bit="4"></div></div>
+                <div class="bit" data-bit="3">TB8<br><div class="switch off" data-bit="3"></div></div>
+                <div class="bit" data-bit="2">RB8<br><div class="switch off" data-bit="2"></div></div>
+                <div class="bit" data-bit="1">TI<br><div class="switch off" data-bit="1"></div></div>
+                <div class="bit" data-bit="0">RI<br><div class="switch off" data-bit="0"></div></div>
+            </div>
+
+            <div class="input-section">
+                <h3>当前设置值：</h3>
+                <p>二进制：<span id="binValue">0000 0000</span></p>
+                <p>十六进制：0x<span id="hexValue">00</span></p>
+                
+                <h3>验证设置：</h3>
+                <input type="text" id="inputValue" placeholder="输入正确二进制值（如11010000）">
+                <button onclick="checkAnswer()">验证答案</button>
+                <div id="result"></div>
+            </div>
+
+            <div class="status-panel">
+                <h3>实时状态诊断：</h3>
+                <div id="modeStatus">
+                    <div class="status-item">
+                        <span class="status-title">工作模式：</span>
+                        <span class="status-text" id="workMode">模式0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-title">接收允许：</span>
+                        <span class="status-text" id="recvStatus">禁用</span>
+                    </div>
+                </div>
+                <div id="interruptStatus">
+                    <div class="status-item">
+                        <span class="status-title">发送中断：</span>
+                        <span class="status-text" id="tiStatus">未触发</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-title">接收中断：</span>
+                        <span class="status-text" id="riStatus">未触发</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scon = 0x00;
+        const modeMap = {
+            0: '模式0（同步移位）',
+            1: '模式1（8位UART）',
+            2: '模式2（9位UART）',
+            3: '模式3（9位UART）'
+        };
+
+        document.querySelectorAll('.switch').forEach(switchElement => {
+            switchElement.addEventListener('click', function() {
+                const bit = parseInt(this.dataset.bit);
+                scon ^= (1 << bit);
+                this.classList.toggle('on');
+                this.classList.toggle('off');
+                updateDisplay();
+            });
+        });
+
+        function updateDisplay() {
+            const binStr = scon.toString(2).padStart(8, '0');
+            document.getElementById('binValue').textContent = 
+                binStr.substr(0,4) + ' ' + binStr.substr(4);
+            document.getElementById('hexValue').textContent = 
+                scon.toString(16).toUpperCase().padStart(2, '0');
+
+            // 更新状态诊断
+            const mode = ((scon >> 6) & 0x03);
+            document.getElementById('workMode').textContent = modeMap[mode];
+            document.getElementById('recvStatus').innerHTML = 
+                (scon & 0x10) ? '<span class="active">启用</span>' : '<span class="inactive">禁用</span>';
+            document.getElementById('tiStatus').innerHTML = 
+                (scon & 0x02) ? '<span class="event-flag">已触发</span>' : '未触发';
+            document.getElementById('riStatus').innerHTML = 
+                (scon & 0x01) ? '<span class="event-flag">已触发</span>' : '未触发';
+        }
+
+        function checkAnswer() {
+            const input = document.getElementById('inputValue').value.replace(/\s/g, '');
+            const resultDiv = document.getElementById('result');
+            
+            if (!/^[01]{8}$/.test(input)) {
+                resultDiv.textContent = "请输入8位二进制数（例如：11010000）";
+                resultDiv.className = 'wrong';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            const expected = parseInt(input, 2);
+            if(scon === expected) {
+                resultDiv.textContent = "✓ 设置正确！";
+                resultDiv.className = 'correct';
+            } else {
+                resultDiv.textContent = "✗ 设置错误，请检查各控制位";
+                resultDiv.className = 'wrong';
+            }
+            resultDiv.style.display = 'block';
+        }
+
+        updateDisplay();
+    </script>
+</body>
+</html>
